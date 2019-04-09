@@ -1,6 +1,7 @@
 import requests, time
 
-token = open("token.txt", "r").readline()
+#token = open("token.txt", "r").readline()
+token = "563230039:AAHUxyPmnppof7X3Ffrisb9YQyi0N-TMY-0"
 
 url = "https://api.telegram.org/bot" + token + "/"
 
