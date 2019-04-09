@@ -1,40 +1,37 @@
-import http.server, socketserver, os
+import requests, time
 
-PORT = int(os.environ.get("PORT", 17995))
-#PORT = 8081
-Handler = http.server.SimpleHTTPRequestHandler
+token = open("token.txt", "r").readline()
 
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
-    print("serving at port", PORT)
-    httpd.serve_forever()
+url = "https://api.telegram.org/bot" + token + "/"
 
 
+def get_updates_json(request):  
+    response = requests.get(request + 'getUpdates')
+    return response.json()
 
+def last_update(data):  
+    results = data['result']
+    total_updates = len(results) - 1
+    return results[total_updates]
 
+def get_chat_id(update):  
+    chat_id = update['message']['chat']['id']
+    return chat_id
 
+def send_mess(chat, text):  
+    params = {'chat_id': chat, 'text': text}
+    response = requests.post(url + 'sendMessage', data=params)
+    return response
 
+def main():  
+    update_id = last_update(get_updates_json(url))['update_id']
+    while True:
+        if update_id == last_update(get_updates_json(url))['update_id']:
+           send_mess(get_chat_id(last_update(get_updates_json(url))), 'test')
+           update_id += 1
+        time.sleep(1)
 
-"""
-from flask import Flask, request
-
-
-
-app = Flask(__name__)
-
-@app.route("/")
-
-def simple():
-    id_ = request.args.get('id')
-    if id_ == 'one':
-        return 'result - one'
-    elif id_ == 'two':
-        return 'result - two'
-    else:
-        return 'no result'
- 
- 
-if __name__ == "__main__":
-    print("hello heroku")
-    app.run(debug=True)
-    print("bye heroku")
-    """
+if __name__ == '__main__':  
+    print("server started")
+    main()
+    print("server finished")
